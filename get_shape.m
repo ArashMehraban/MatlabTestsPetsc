@@ -34,9 +34,9 @@ function [B, D_hat, W_hat] = get_shape(num_quadr_pts_in_1d, dim)
 %               bHat: Shape/Basis functions in 1D
 %               dHat: Derivative of shape/basis functions in 1D
 %               Kronecker Product = (K)
-%                  D0 = bHat (k) dHat     D0 = bHat (K) bHat (K) dHat   
+%                  D0 = bHat (k) dHat     D0 = dHat (K) bHat (K) bHat   
 %                  D1 = dHat (K) bHat     D1 = bHat (K) dHat (K) bHat
-%                                         D2 = dHat (K) bHat (K) bHat
+%                                         D2 = bHat (K) bHat (K) dHat
 %
        % x: Guass points    w: Gauss weights
        [x, w] = get_quadrature(num_quadr_pts_in_1d);
@@ -72,7 +72,7 @@ function [B, D_hat, W_hat] = get_shape(num_quadr_pts_in_1d, dim)
            % Basis/Shape functions (B)
            B = kron(kron(bHat,bHat),bHat); 
            % Derivative of Basis/Shapefunctions (D_hat)
-           D_hat = [kron(kron(bHat,bHat),dHat); kron(kron(bHat,dHat),bHat);kron(kron(dHat,bHat),bHat)];
+           D_hat = [kron(kron(dHat,bHat),bHat); kron(kron(bHat,dHat),bHat);kron(kron(bHat,bHat),dHat)];
            % weights (W_hat)
            W_hat = kron(kron(w,w), w);
        end    
