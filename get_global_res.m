@@ -1,4 +1,4 @@
-function [stored , global_res] = get_global_res(u, global_idx_map, msh, dir_bndry_val,P,userf,phys, store)
+function [stored , global_res] = get_global_res(u, global_idx_map, msh, dir_bndry_val,P,userf,usrf_force,phys, store)
 % GET_GLOBAL_RES evaluates the global residual and the consistent tangent
 %  input:              u: vector of unknowns 
 %       : global_idx_map: global map of local u's
@@ -35,21 +35,22 @@ function [stored , global_res] = get_global_res(u, global_idx_map, msh, dir_bndr
          %get corresponding unknown/solution u for each element
          elem_u = u_closure(msh.conn(i,:),:);   
          
+         %Compute ForcingVector
          xe= B*element_vtx_coords;
-         ue = B*elem_u;
+         f0 = usrf_force(xe,phys); %forcing function
          
-         grad_ue= D*elem_u; % elemt derivative
+         %Compute Constitutive model
+         du= D*elem_u; % elemt derivative wrt xi eta zeta
          dxdX= D*element_vtx_coords; %element
-         [dets, dXdx] = invJacobianTensor(dxdX,P); %dXdx: element inverse Jacobian
+         [dets, dXdx] = invJacobianTensor(dxdX); %dXdx: element inverse Jacobian
          wdetj = W.*dets;
-          
          %phys passes the user defined Physics (such as nu, E, etc.)
-         [usrfStored, f0,f1] = userf(ue, xe, grad_ue, dXdx, wdetj, phys); 
+         [usrfStored, f1] = userf(du, dXdx, wdetj, phys); 
          
          % store compupted gradu from userf to be used in consistent
          % tangent operator
          if store == 1
-             stored((i-1)*size(grad_ue,1)+1:i*size(grad_ue,1),:) = usrfStored;
+             stored((i-1)*size(du,1)+1:i*size(du,1),:) = usrfStored;
          end
          
          % element residual evaluation

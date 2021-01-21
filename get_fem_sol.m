@@ -1,4 +1,4 @@
-function u =  get_fem_sol(msh, dof, dir_bndry_nodes, dir_bndry_val,P,userf,userdf,solver, phys, store)
+function u =  get_fem_sol(msh, dof, dir_bndry_nodes, dir_bndry_val,P,userf,userdf,usrf_force,solver, phys, store)
 %GET_FEM_SOL returns the solution to the PDE
 %
 %input :                msh: mesh object
@@ -60,7 +60,7 @@ function u =  get_fem_sol(msh, dof, dir_bndry_nodes, dir_bndry_val,P,userf,userd
         end
         
         while(true)
-            [stored, global_res] = get_global_res(u, global_idx_map, msh, dir_bndry_val,P,userf,phys, store); 
+            [stored, global_res] = get_global_res(u, global_idx_map, msh, dir_bndry_val,P,userf,usrf_force,phys, store); 
             
             global_res_norm = norm(global_res,inf);
         
@@ -83,7 +83,7 @@ function u =  get_fem_sol(msh, dof, dir_bndry_nodes, dir_bndry_val,P,userf,userd
                break;
             end
 
-            jv_fun = @(dlta_u)get_global_Jv(dlta_u, global_idx_map, msh, P, userdf,AppCtx);
+            jv_fun = @(dlta_u)get_global_Jv(dlta_u, global_idx_map, msh, P, userdf,stored);
             
             if strcmp(solver.precond ,'OFF')
                 tic
