@@ -1,4 +1,4 @@
-function f = HyperFS_dF(dlta_ue, xe, grad_dlta_ue, stored ,dXdx, wdetj, phys)
+function f = HyperFS_dF(grad_dlta_ue, stored ,dXdx, wdetj, phys)
 %USERF_3d_ELAS provides weak form of the linear 3D Elastisity problem to solve 
 %
 %IMPORTANT:
