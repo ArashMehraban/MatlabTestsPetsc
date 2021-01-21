@@ -72,7 +72,7 @@ function [B, D_hat, W_hat] = get_shape(num_quadr_pts_in_1d, dim)
            % Basis/Shape functions (B)
            B = kron(kron(bHat,bHat),bHat); 
            % Derivative of Basis/Shapefunctions (D_hat)
-           D_hat = [kron(kron(dHat,bHat),bHat); kron(kron(bHat,dHat),bHat);kron(kron(bHat,bHat),dHat)];
+           D_hat = [kron(kron(bHat,bHat),dHat); kron(kron(bHat,dHat),bHat); kron(kron(dHat,bHat),bHat)];
            % weights (W_hat)
            W_hat = kron(kron(w,w), w);
        end    
