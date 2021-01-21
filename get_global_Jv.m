@@ -31,13 +31,13 @@ function Jv = get_global_Jv(dlta_u, global_idx_map, msh,P, userdf,phys, stored)
          %get corresponding unknown/solution u and du for each element
          elem_dlta_u = delta_u_closure(msh.conn(i,:),:); 
                   
-         grad_dlta_ue = D*elem_dlta_u; % elemt derivative
+         ddu = D*elem_dlta_u; % elemt derivative
          dxdX= D*element_vtx_coords; %element
          [dets, dXdx] = invJacobianTensor(dxdX); %dXdx: element inverse Jacobian
          wdetj = W.*dets;
                    
          %stored passes the userf defined Physics (such as nu, E, etc.)
-         f = userdf(grad_dlta_ue, stored((i-1)*size(grad_dlta_ue,1)+1:i*size(grad_dlta_ue,1),:) ,dXdx, wdetj, phys);
+         f = userdf(ddu, stored((i-1)*size(ddu,1)+1:i*size(ddu,1),:) ,dXdx, wdetj, phys);
          
          %Matrix Free Jacobian per element (This is a Vector)
          Jv_e = [B' D']*f;

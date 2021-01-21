@@ -1,4 +1,4 @@
-function f = LinElas_dF(grad_dlta_ue, stored ,dXdx, wdetj, phys)
+function f = LinElas_dF(ddu, stored ,dXdx, wdetj, phys)
 %USERF_3d_ELAS provides weak form of the linear 3D Elastisity problem to solve 
 %
 %IMPORTANT:
@@ -31,22 +31,46 @@ function f = LinElas_dF(grad_dlta_ue, stored ,dXdx, wdetj, phys)
 %              [.....  | .....  |  .....]                                            [   .....     |    .....     |     .....   ]
 %
 %
-%     NOTE 1: 
-%        We need to compute F = I + nabla_u. Notice that each row of
-%        nabla_u is placed in every other 8th row in above grad_ue. 
-%     NOTE 2:
-%        The nabla_u we take in NOTE 1, is really the TRANSPOSE of the nabla_u 
-%         we really need to compute F = I + nabla_u. So transpose it.
-%      Summary of NOTE 1 and NOTE 2 gives:
-%       Write all operations in this for loop:
-%          
-%          num_row = size(ue,1);       <-- num_row is 8 here 
-%          for i = 1:num_row 
-%              F =  eye(3) + grad_ue(i:num_row:end,:)';            <--- This truley F = I + nalba_u  
-%              dltaF =  grad_dlta_ue(i:num_row:end,:)';   <--- This truley dltaF = I + nalba_dlta_u
-%              ....
-%              ...
-%          end
-
+   %ddu is variation of du
+   graddu=  0*ddu; %Allocate sapce for gradu that gets computed here
+   gradduT= 0*ddu; %Allocate space for Transpose of gradu
+   sigma = 0*ddu; %Allocate sapce for sigma computation
+   f = 0*ddu; %This dvdX in libCEED
+   [r,c] = size(du);
+   blk = r/c; 
+   idx = reshape(reshape(1:r,blk,c)',[],1); 
+   permuted_ddu = ddu(idx,:);
+   permuted_dXdx = dXdx(idx,:);
+   
+   for i = 1:blk
+     tmp=permuted_ddu((i-1)*c+1:i*c,:) * permuted_dXdx((i-1)*c+1:i*c,:);
+     graddu(idx((i-1)*c+1:i*c),:) = tmp;
+     gradduT(idx((i-1)*c+1:i*c),:) = tmp';
+   end
+   
+   e = 0.5 * (graddu+gradduT); %strain
+   
+   nu = phys.nu;
+   E = phys.E;
+   ss = E / ((1 + nu)*(1 - 2*nu));
+   
+   for i=1:blk
+       tmp = e((i-1)*c+1:i*c,:);
+       sigma11 = ss*((1 - nu)*tmp(1,1) + nu*tmp(2,2) + nu*tmp(3,3)); 
+       sigma22 = ss*(nu*tmp(1,1)+ (1 - nu)*tmp(2,2) + nu*tmp(3,3));
+       sigma33 = ss*(nu*tmp(1,1) + nu*tmp(2,2) + (1 - nu)*tmp(3,3));
+       sigma23 = ss*(1 - 2*nu)*tmp(2,3)*0.5;
+       sigma13 = ss*(1 - 2*nu)*tmp(1,3)*0.5;
+       sigma12 = ss*(1 - 2*nu)*tmp(1,2)*0.5;
+       sigma3x3 = [sigma11 sigma12 sigma13;
+                   sigma12 sigma22 sigma23;
+                   sigma13 sigma23 sigma33];               
+       sigma(idx((i-1)*c+1:i*c),:) = sigma3x3;
+   end
+   
+   for i = 1:blk
+     tmp=sigma((i-1)*c+1:i*c,:) * permuted_dXdx((i-1)*c+1:i*c,:);
+     f(idx((i-1)*c+1:i*c),:) = tmp*wdetj(i);
+   end
 
 end
