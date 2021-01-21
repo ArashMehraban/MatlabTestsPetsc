@@ -8,9 +8,11 @@ degree = 1;
 P = degree +1;
 
 %physic implementation for residual evaluation
-userf= @linElas;
+userf= @LinElas;
 %physic implementation for Jacobian and action of Jacobian evaluation
-userdf=@linElas_dF;
+userdf=@LinElas_dF;
+%Forcing function
+usrf_force=@LinElas_force; 
 %Phyics parameter
 phys=struct();
 phys.nu = 0.3;
@@ -28,24 +30,31 @@ solver.global_res_tol = 1.0e-6;
 solver.precond = 'OFF';
 solver.numSteps = 1;
 
-[~ , msh] = get_mesh('cube8_8','exo','lex');
+% Use this mesh for MMS
+[~ , msh] = get_mesh('cylinder8_1176e_us','exo','lex');
+%[~ , msh] = get_mesh('cube8_8','exo','lex');
 
-elem_type = msh.num_nodes_per_elem;
 dof = 3;
 %get all Dirichlet boundary node sets
 dir_bndry_nodes = get_all_dir_ns(msh);
     
 %NOTE: modify userf function according to given_u
-given_u{1}=@(x,y,z)0;
-given_u{2}=@(x,y,z)0;
-given_u{3}=@(x,y,z)0.5*z;
+%NOTE: Proposed solution to manufacture rhs from in userf function:
+given_u{1}=@(x,y,z)exp(2*x).*sin(3*y).*cos(4*z);
+given_u{2}=@(x,y,z)exp(3*y).*sin(4*z).*cos(2*x); 
+given_u{3}=@(x,y,z)exp(4*z).*sin(2*x).*cos(3*y);
+
 %get vertex coordinates from mesh                                     
 vtx_coords = msh.vtx_coords;                                          
 %get constructed dir_bndry_vals and exac Solutions on remaining nodes 
-[dir_bndry_val, ~] = get_exact_sol(vtx_coords,dir_bndry_nodes, given_u);
-dir_bndry_val{1} = 0* dir_bndry_val{1};
+[dir_bndry_val, exactSol] = get_exact_sol(vtx_coords,dir_bndry_nodes, given_u);
 
-fem_sol =  get_fem_sol(msh, dof, dir_bndry_nodes, dir_bndry_val,P,userf,userdf,solver, phys, store);
+fem_sol =  get_fem_sol(msh, dof, dir_bndry_nodes, dir_bndry_val,P,userf,userdf,usrf_force, solver, phys, store);
+
+error = norm(exactSol - fem_sol)/norm(fem_sol);
+L2ErrMsg = strcat('L2 Error: ', num2str(error));
+disp(L2ErrMsg);
+
 
 
 
