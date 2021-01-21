@@ -16,7 +16,7 @@ usrf_force=@LinElas_force;
 %Phyics parameter
 phys=struct();
 phys.nu = 0.3;
-phys.E = 6.9e10;
+phys.E = 1;
 
 %if nonlinear problem store gradu or tensor C 
 store = 0; 
@@ -31,7 +31,7 @@ solver.precond = 'OFF';
 solver.numSteps = 1;
 
 % Use this mesh for MMS
-[~ , msh] = get_mesh('cylinder8_1176e_us','exo','lex');
+[~ , msh] = get_mesh('cylinder8_368e_us','exo','lex');
 %[~ , msh] = get_mesh('cube8_8','exo','lex');
 
 dof = 3;

@@ -79,11 +79,11 @@ function u =  get_fem_sol(msh, dof, dir_bndry_nodes, dir_bndry_val,P,userf,userd
             disp(ralative_tolerance);
             fprintf('\n');
         
-            if(global_res_norm < global_res_tol || abs(global_res_norm/ gl_res_norm(1)) < solver.global_res_tol || iter > nonlinear_max_iter )
+            if(global_res_norm < solver.global_res_tol || abs(global_res_norm/ gl_res_norm(1)) < solver.global_res_tol || iter > solver.nonlinear_max_iter )
                break;
             end
 
-            jv_fun = @(dlta_u)get_global_Jv(dlta_u, global_idx_map, msh, P, userdf,stored);
+            jv_fun = @(dlta_u)get_global_Jv(dlta_u, global_idx_map, msh,P, userdf,phys, stored);
             
             if strcmp(solver.precond ,'OFF')
                 tic

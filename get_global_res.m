@@ -25,6 +25,8 @@ function [stored , global_res] = get_global_res(u, global_idx_map, msh, dir_bndr
      %allocate space for storage of gradu or tensor C if needed
      if store == 1
         stored = zeros(msh.num_elem*size(D,1) , size(global_idx_map,2));
+     else
+         stored = 0;
      end
      
      for i=1:msh.num_elem
@@ -39,12 +41,18 @@ function [stored , global_res] = get_global_res(u, global_idx_map, msh, dir_bndr
          xe= B*element_vtx_coords;
          f0 = usrf_force(xe,phys); %forcing function
          
+         
          %Compute Constitutive model
          du= D*elem_u; % elemt derivative wrt xi eta zeta
-         dxdX= D*element_vtx_coords; %element
-         [dets, dXdx] = invJacobianTensor(dxdX); %dXdx: element inverse Jacobian
+         dx= D*element_vtx_coords; %element
+         [dets, dXdx] = invJacobianTensor(dx); %dXdx: element inverse Jacobian
          wdetj = W.*dets;
          %phys passes the user defined Physics (such as nu, E, etc.)
+         
+         for j=1:size(f0,2)
+             f0(:,j)=wdetj.*f0(:,j);
+         end 
+         
          [usrfStored, f1] = userf(du, dXdx, wdetj, phys); 
          
          % store compupted gradu from userf to be used in consistent
@@ -57,8 +65,8 @@ function [stored , global_res] = get_global_res(u, global_idx_map, msh, dir_bndr
          res_e = B'*f0 + D'*f1;
 
          % global residual assembly 
-         temp=msh.num_elem(i,:)';
-         k=1:size(msh.num_elem(i,:),2);
+         temp=msh.conn(i,:)';
+         k=1:size(msh.conn(i,:),2);
          kk=temp(k);
          in_glb = global_idx_map(kk,:);
          kk =in_glb(in_glb>=0);

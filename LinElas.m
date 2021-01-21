@@ -42,9 +42,10 @@ function [usrfStored, f1] = LinElas(du, dXdx, wdetj, phys)
    permuted_dXdx = dXdx(idx,:);
    
    for i = 1:blk
-     tmp=permuted_du((i-1)*c+1:i*c,:) * permuted_dXdx((i-1)*c+1:i*c,:);
+     tmp= permuted_dXdx((i-1)*c+1:i*c,:) * permuted_du((i-1)*c+1:i*c,:);
      gradu(idx((i-1)*c+1:i*c),:) = tmp;
      graduT(idx((i-1)*c+1:i*c),:) = tmp';
+     permuted_dXdxT((i-1)*c+1:i*c,:) = permuted_dXdx((i-1)*c+1:i*c,:)';
    end
    
    e = 0.5 * (gradu+graduT); %strain
@@ -54,7 +55,7 @@ function [usrfStored, f1] = LinElas(du, dXdx, wdetj, phys)
    ss = E / ((1 + nu)*(1 - 2*nu));
    
    for i=1:blk
-       tmp = e((i-1)*c+1:i*c,:);
+       tmp = e(idx((i-1)*c+1:i*c),:);
        sigma11 = ss*((1 - nu)*tmp(1,1) + nu*tmp(2,2) + nu*tmp(3,3)); 
        sigma22 = ss*(nu*tmp(1,1)+ (1 - nu)*tmp(2,2) + nu*tmp(3,3));
        sigma33 = ss*(nu*tmp(1,1) + nu*tmp(2,2) + (1 - nu)*tmp(3,3));
@@ -68,7 +69,7 @@ function [usrfStored, f1] = LinElas(du, dXdx, wdetj, phys)
    end
    
    for i = 1:blk
-     tmp=sigma((i-1)*c+1:i*c,:) * permuted_dXdx((i-1)*c+1:i*c,:);
+     tmp= permuted_dXdxT((i-1)*c+1:i*c,:) * sigma(idx((i-1)*c+1:i*c),:);
      f1(idx((i-1)*c+1:i*c),:) = tmp*wdetj(i);
    end
    

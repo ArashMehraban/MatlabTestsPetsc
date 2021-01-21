@@ -35,16 +35,22 @@ function Jv = get_global_Jv(dlta_u, global_idx_map, msh,P, userdf,phys, stored)
          dxdX= D*element_vtx_coords; %element
          [dets, dXdx] = invJacobianTensor(dxdX); %dXdx: element inverse Jacobian
          wdetj = W.*dets;
-                   
-         %stored passes the userf defined Physics (such as nu, E, etc.)
-         f = userdf(ddu, stored((i-1)*size(ddu,1)+1:i*size(ddu,1),:) ,dXdx, wdetj, phys);
+         
+         dlta_ue = B*elem_dlta_u;
+         
+         if stored == 0
+             f = userdf(dlta_ue, ddu, stored ,dXdx, wdetj, phys);
+         else
+             %stored passes the userf defined Physics (such as nu, E, etc.)
+             f = userdf(dlta_ue, ddu, stored((i-1)*size(ddu,1)+1:i*size(ddu,1),:) ,dXdx, wdetj, phys);
+         end
          
          %Matrix Free Jacobian per element (This is a Vector)
          Jv_e = [B' D']*f;
   
          % global (the action of) jacobian assembly 
-         temp=msh.num_elem(i,:)';
-         k=1:size(msh.num_elem(i,:),2);
+         temp=msh.conn(i,:)';
+         k=1:size(msh.conn(i,:),2);
          kk=temp(k);
          in_glb = global_idx_map(kk,:);
          kk =in_glb(in_glb>=0);
