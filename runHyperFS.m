@@ -12,15 +12,16 @@ P = degree +1;
 userf= @HyperFS;
 %physic implementation for Jacobian and action of Jacobian evaluation
 userdf=@HyperFS_dF;
+%Forcing function
+usrf_force=@HyperFS_force; 
 %Phyics parameter
 phys=struct();
 phys.nu = 0.3;
-phys.E = 6.9e10;
+phys.E = 1;
 
 %if nonlinear problem store gradu or tensor C 
-store = 0; 
+store = 1; 
 
-%solver usage
 solver=struct();
 solver.KSP_type = 'gmres';
 solver.KSP_max_iter = 225;
@@ -31,7 +32,6 @@ solver.numSteps = 1;
 
 [~ , msh] = get_mesh('cube8_8','exo','lex');
 
-elem_type = msh.num_nodes_per_elem;
 dof = 3;
 %get all Dirichlet boundary node sets
 dir_bndry_nodes = get_all_dir_ns(msh);
@@ -46,7 +46,7 @@ vtx_coords = msh.vtx_coords;
 [dir_bndry_val, ~] = get_exact_sol(vtx_coords,dir_bndry_nodes, given_u);
 dir_bndry_val{1} = 0* dir_bndry_val{1};
 
-fem_sol =  get_fem_sol(msh, dof, dir_bndry_nodes, dir_bndry_val,P,userf,userdf,solver, phys, store);
+fem_sol =  get_fem_sol(msh, dof, dir_bndry_nodes, dir_bndry_val,P,userf,userdf,usrf_force, solver, phys, store);
 
 
 
