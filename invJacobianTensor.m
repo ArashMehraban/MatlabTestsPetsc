@@ -1,8 +1,8 @@
-function [dets, invJe] = invJacobianTensor(elemJac, P)
+function [dets, invJe] = invJacobianTensor(elemJac)
 
  [r,c] = size(elemJac);
  invJe = zeros(r,c);
- blk = P*P*P;
+ blk = r/c;
  dets = zeros(blk,1);
  
  idx = reshape(reshape(1:r,blk,c)',[],1);
