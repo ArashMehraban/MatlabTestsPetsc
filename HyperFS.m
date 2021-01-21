@@ -58,7 +58,7 @@ function [usrfStored, f1] = HyperFS(du, dXdx, wdetj, phys)
      C_inv = C\eye(3);
      S = muu*eye(3) + (lambda*log(J(i))-muu)*C_inv;
      P = F * S;
-     %f1 is dvdX meaning P * dXdx^T
+     %f1 is dvdX meaning dXdx^T * P * wdetj 
      f1(idx((i-1)*c+1:i*c),:) = permuted_dXdx((i-1)*c+1:i*c,:)'* P * wdetj(i);
    end
        

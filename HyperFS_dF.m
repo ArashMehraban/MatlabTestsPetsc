@@ -3,7 +3,7 @@ function f = HyperFS_dF(dlta_ue,ddu, stored ,dXdx, wdetj, phys)
 %
 %IMPORTANT:
 %     
-%              [du1/dx | du2/dx | du3/dx]    <-for Node 1                            [d_dlta_u1/dx | d_dlta_u2/dx | d_dlta_u3/dx]    <-for Node 1
+%              [du1/dx | du2/dx | du3/dx]    <-for quadrature 1                      [d_dlta_u1/dx | d_dlta_u2/dx | d_dlta_u3/dx]    <-for quadrature 1
 %              [.....  | .....  |  .....]                                            [   .....     |    .....     |     .....   ] 
 %              [.....  | .....  |  .....]                                            [   .....     |    .....     |     .....   ]
 %              [.....  | .....  |  .....]                                            [   .....     |    .....     |     .....   ]
@@ -12,7 +12,7 @@ function f = HyperFS_dF(dlta_ue,ddu, stored ,dXdx, wdetj, phys)
 %              [.....  | .....  |  .....]                                            [   .....     |    .....     |     .....   ]
 %              [.....  | .....  |  .....]                                            [   .....     |    .....     |     .....   ]
 %           ---------------------------------                                     ----------------------------------------------------
-%              [du1/dy | du2/dy | du3/dy]    <-for Node 1                            [d_dlta_u1/dy | d_dlta_u2/dy | d_dlta_u3/dy]   <-for Node 1
+%              [du1/dy | du2/dy | du3/dy]    <-for quadrature 1                      [d_dlta_u1/dy | d_dlta_u2/dy | d_dlta_u3/dy]   <-for quadrature 1
 %              [.....  | .....  |  .....]                                            [   .....     |    .....     |     .....   ]
 %              [.....  | .....  |  .....]                                            [   .....     |    .....     |     .....   ]                    
 % grad_ue =    [.....  | .....  |  .....]                            grad_dlta_ue =  [   .....     |    .....     |     .....   ]
@@ -21,7 +21,7 @@ function f = HyperFS_dF(dlta_ue,ddu, stored ,dXdx, wdetj, phys)
 %              [.....  | .....  |  .....]                                            [   .....     |    .....     |     .....   ]
 %              [.....  | .....  |  .....]                                            [   .....     |    .....     |     .....   ]
 %           ---------------------------------                                     ----------------------------------------------------
-%              [du1/dz | du2/dz | du3/dz]    <-for Node 1                            [d_dlta_u1/dz | d_dlta_u2/dz | d_dlta_u3/dz]   <-for Node 1
+%              [du1/dz | du2/dz | du3/dz]    <-for quadrature 1                      [d_dlta_u1/dz | d_dlta_u2/dz | d_dlta_u3/dz]   <-for quadrature 1
 %              [.....  | .....  |  .....]                                            [   .....     |    .....     |     .....   ]
 %              [.....  | .....  |  .....]                                            [   .....     |    .....     |     .....   ]
 %              [.....  | .....  |  .....]                                            [   .....     |    .....     |     .....   ]
@@ -67,7 +67,7 @@ function f = HyperFS_dF(dlta_ue,ddu, stored ,dXdx, wdetj, phys)
      dS = lambda * Cinv_contract_deltaE * C_inv + 2*(muu-lambda*log(J(i)))*C_inv*deltaE*C_inv;
      %dP = deltaF*S + F*dS where deltaF = ddu_tmp
      dP = ddu_tmp * S + F*dS;
-     %f is dvdX meaning P * dXdx^T
+     %fP is dvdX meaning dXdx^T *dP * wdetj
      fP(idx((i-1)*c+1:i*c),:) = permuted_dXdx((i-1)*c+1:i*c,:)'* dP * wdetj(i);
    end
    
