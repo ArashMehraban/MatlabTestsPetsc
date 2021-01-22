@@ -61,7 +61,9 @@ function f = HyperFS_dF_cur(dlta_ue,ddu, stored ,dXdx, wdetj, phys)
      F_inv = F\I3; 
      tau = muu * b - (muu - 2*lambda*log(J(i)))*eye(3);
      %dtau = mu*delta_b + 2lambda * F^(-T) dF (Note: dF = ddu_tmp)
-     dtau = muu *delta_b + 2* lambda * F_inv' * ddu_tmp;
+     Finv_contract_deltaF = sum(sum(F_inv' .* ddu_tmp));
+     %dtau = muu *delta_b + 2* lambda * F_inv' * ddu_tmp;
+     dtau = muu *delta_b + 2* lambda * Finv_contract_deltaF * I3;
      dstress = -ddu_tmp * F_inv * tau + dtau;
      %fP is dvdX meaning dXdx^T *dP * wdetj
      fs(idx((i-1)*c+1:i*c),:) = (permuted_dXdx((i-1)*c+1:i*c,:)'* dstress * wdetj(i))/J(i);
