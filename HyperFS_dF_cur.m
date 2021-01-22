@@ -55,14 +55,14 @@ function f = HyperFS_dF_cur(dlta_ue,ddu, stored ,dXdx, wdetj, phys)
      ddu_tmp= permuted_dXdx((i-1)*c+1:i*c,:) * permuted_ddu((i-1)*c+1:i*c,:);
      graddu(idx((i-1)*c+1:i*c),:) = ddu_tmp;
      F = eye(3) + stored((i-1)*c+1:i*c,:); %stored contains gradu from userf
-     delta_b = 0.5*(ddu_tmp * F' + F * ddu_tmp');
+     delta_b = (ddu_tmp * F' + F * ddu_tmp');
      J(i) = det(F);
      b = F * F';
      F_inv = F\I3; 
      tau = muu * b - (muu - 2*lambda*log(J(i)))*eye(3);
      %dtau = mu*delta_b + 2lambda * F^(-T) dF (Note: dF = ddu_tmp)
      dtau = muu *delta_b + 2* lambda * F_inv' * ddu_tmp;
-     dstress = ddu_tmp * F_inv * tau + dtau;
+     dstress = -ddu_tmp * F_inv * tau + dtau;
      %fP is dvdX meaning dXdx^T *dP * wdetj
      fs(idx((i-1)*c+1:i*c),:) = (permuted_dXdx((i-1)*c+1:i*c,:)'* dstress * wdetj(i))/J(i);
    end
