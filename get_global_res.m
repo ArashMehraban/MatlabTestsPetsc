@@ -1,4 +1,4 @@
-function [stored , global_res] = get_global_res(u, global_idx_map, msh, dir_bndry_val,P,userf,usrf_force,phys, store)
+function [global_res, stored] = get_global_res(u, global_idx_map, msh, dir_bndry_val,P,userf,usrf_force,phys, store)
 % GET_GLOBAL_RES evaluates the global residual and the consistent tangent
 %  input:              u: vector of unknowns 
 %       : global_idx_map: global map of local u's
