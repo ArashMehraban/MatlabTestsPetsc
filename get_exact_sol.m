@@ -1,9 +1,9 @@
-function [dir_bndry_val, exactSol] = get_exact_sol(vtx_coords,dir_bndry_nodes, given_u)
+function [dir_bndry_val, exactSol] = get_exact_sol(msh,dir_bndry_nodes, given_u)
 % Use GET_EXCAT_SOL function to construct Diricklet Boundary values
 % at specifed Dirchlet boundary nodes passed to GET_EXCAT_SOL     
 
     %get the exact solution from constructed equations at each node/field
-    exactSol = exactf(vtx_coords, given_u);
+    exactSol = exactf(msh, given_u);
               
     dir_bndry_val = cellfun(@(x) 0*x,dir_bndry_nodes,'un',0);
     
@@ -24,25 +24,24 @@ function [dir_bndry_val, exactSol] = get_exact_sol(vtx_coords,dir_bndry_nodes, g
     exactSol = reshape(exactSol',[],1);
 end
 % helper function for coordinate evaluation
-function exctSol = exactf(vtx_coords, given_u)
+function exctSol = exactf(msh, given_u)
     
-    x = vtx_coords(:,1);
-    y = vtx_coords(:,2);
+    x = msh.vtx_coords(:,1);
+    y = msh.vtx_coords(:,2);
     
-    num_dim = size(vtx_coords,2);
+    num_dim = size(msh.vtx_coords,2);
     if(num_dim>2)
-        z = vtx_coords(:,3);        
+        z = msh.vtx_coords(:,3);        
     end
     
-    sz_gvn_u = size(given_u,2);
-    exctSol = zeros(size(vtx_coords,1),sz_gvn_u);    
+    exctSol = zeros(msh.num_nodes,msh.num_dims);    
     
     if(num_dim==2)
-        for i=1:sz_gvn_u
+        for i=1:msh.num_dims
             exctSol(:,i) = given_u{i}(x,y);
         end
     else
-        for i=1:sz_gvn_u
+        for i=1:msh.num_dims
             exctSol(:,i) = given_u{i}(x,y,z);
         end
     end
