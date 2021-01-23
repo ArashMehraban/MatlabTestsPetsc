@@ -61,7 +61,7 @@ function [u,JACOB__] =  get_fem_sol(msh, dof, dir_bndry_nodes, dir_bndry_val,P,u
         
         while(true)
             [global_res, stored] = get_global_res(u, global_idx_map, msh, step_dir_bndry_val,P,userf,usrf_force,phys, store); 
-            JACOB__ = 0;
+            JACOB__ = 'Matrix-Free Applied';
             
             global_res_norm = norm(global_res,inf);
         
@@ -132,7 +132,7 @@ function [u,JACOB__] =  get_fem_sol(msh, dof, dir_bndry_nodes, dir_bndry_val,P,u
         
         fun = @(u)get_global_res(u, global_idx_map, msh, step_dir_bndry_val,P,userf,usrf_force,phys, store);
         %options = optimoptions(@fsolve,'Algorithm','Levenberg-Marquardt');%, 'TolX',tol); %,'Jacobian','on');
-        [u,fval,~,~,JACOB__] = fsolve(fun, u);% ,options);
+        [u,~,~,~,JACOB__] = fsolve(fun, u);% ,options);
       end
    end
 end
