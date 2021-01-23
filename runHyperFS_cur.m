@@ -46,9 +46,8 @@ given_u{1}=@(x,y,z)0;
 given_u{2}=@(x,y,z)0;
 given_u{3}=@(x,y,z)0.5*z;
 %get vertex coordinates from mesh                                     
-vtx_coords = msh.vtx_coords;                                          
-%get constructed dir_bndry_vals and exac Solutions on remaining nodes 
-[dir_bndry_val, ~] = get_exact_sol(vtx_coords,dir_bndry_nodes, given_u);
+
+[dir_bndry_val, ~] = get_exact_sol(msh,dir_bndry_nodes, given_u);
 dir_bndry_val{1} = 0* dir_bndry_val{1};
 
 [fem_sol,Jac] =  get_fem_sol(msh, dof, dir_bndry_nodes, dir_bndry_val,P,userf,userdf,usrf_force, solver, phys, store);
