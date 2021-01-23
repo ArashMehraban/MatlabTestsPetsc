@@ -22,8 +22,13 @@ phys.E = 1;
 %if nonlinear problem store gradu or tensor C 
 store = 1; 
 
+%NOTE: You can use MATLAB's nonlinear solver fsolve to test the correctness
+%      of the residual evaluation function (get_global_res) by setting
+%      the KSPS_type = 'newton_override'. With that option, solve time will
+%      increase especially for larger meshes and the action of Jacobian
+%      function (get_global_Jv) will be ignored. 
 solver=struct();
-solver.KSP_type = 'gmres';
+solver.KSP_type = 'gmres'; %solver.KSP_type = 'newton_override'; for fsolve
 solver.KSP_max_iter = 225;
 solver.nonlinear_max_iter=10;
 solver.global_res_tol = 1.0e-6;
