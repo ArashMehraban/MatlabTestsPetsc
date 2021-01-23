@@ -1,4 +1,4 @@
-function u =  get_fem_sol(msh, dof, dir_bndry_nodes, dir_bndry_val,P,userf,userdf,usrf_force,solver, phys, store)
+function [u,JACOB__] =  get_fem_sol(msh, dof, dir_bndry_nodes, dir_bndry_val,P,userf,userdf,usrf_force,solver, phys, store)
 %GET_FEM_SOL returns the solution to the PDE
 %
 %input :                msh: mesh object
@@ -60,7 +60,8 @@ function u =  get_fem_sol(msh, dof, dir_bndry_nodes, dir_bndry_val,P,userf,userd
         end
         
         while(true)
-            [stored, global_res] = get_global_res(u, global_idx_map, msh, dir_bndry_val,P,userf,usrf_force,phys, store); 
+            [global_res, stored] = get_global_res(u, global_idx_map, msh, step_dir_bndry_val,P,userf,usrf_force,phys, store); 
+            JACOB__ = 0;
             
             global_res_norm = norm(global_res,inf);
         
@@ -111,6 +112,27 @@ function u =  get_fem_sol(msh, dof, dir_bndry_nodes, dir_bndry_val,P,userf,userd
             
             iter=iter+1;
         end
-    end
-  end       
+     end
+  end
+  
+  if(strcmp(solver.KSP_type,'newton_override'))
+        
+      t = linspace(0,1,solver.numSteps+1);
+      dt = t(:,2:end);
+     
+      step_dir_bndry_val = dir_bndry_val;
+
+      for m=1:solver.numSteps
+    
+        if solver.numSteps>1
+            for ii=1:size(dir_bndry_val,1)
+                step_dir_bndry_val{ii} = dir_bndry_val{ii}*dt(m);
+            end
+        end
+        
+        fun = @(u)get_global_res(u, global_idx_map, msh, step_dir_bndry_val,P,userf,usrf_force,phys, store);
+        %options = optimoptions(@fsolve,'Algorithm','Levenberg-Marquardt');%, 'TolX',tol); %,'Jacobian','on');
+        [u,fval,~,~,JACOB__] = fsolve(fun, u);% ,options);
+      end
+   end
 end
