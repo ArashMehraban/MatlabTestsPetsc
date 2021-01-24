@@ -4,10 +4,6 @@ clear
 clc
 format short
 
-%degree of accuracy to solve with
-degree = 1;
-P = degree +1;
-
 %physic implementation for residual evaluation
 userf= @HyperFS;
 %physic implementation for Jacobian and action of Jacobian evaluation
@@ -35,6 +31,9 @@ solver.global_res_tol = 1.0e-6;
 solver.precond = 'OFF';
 solver.numSteps = 1;
 
+%degree of accuracy to solve with
+degree = 1;
+P = degree +1;
 [~ , msh] = get_mesh('cube8_8','exo','lex');
 
 dof = 3;

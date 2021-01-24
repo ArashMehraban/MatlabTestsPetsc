@@ -1,35 +1,44 @@
 function [usrfStored, f1] = HyperFS_cur(du, dXdx, wdetj, phys)
-%USERF_3d_ELAS provides weak form of the linear 3D Elastisity problem to solve 
+%HyperFS_cur implements constitutive model for the compressible Neo-Hookean
+%Hyperelasticity at finite strain using the current configuration 
 %
 % IMPORTANT:
 %
-%              [du1/dx | du2/dx | du3/dx]    <-for quadrature 1                           
-%              [.....  | .....  |  .....]                             
-%              [.....  | .....  |  .....]
-%              [.....  | .....  |  .....]
-%              [.....  | .....  |  .....]
-%              [.....  | .....  |  .....]
-%              [.....  | .....  |  .....]
-%              [.....  | .....  |  .....]
-%           ---------------------------------
+%              [du1/dx | du2/dx | du3/dx]    <-for quadrature 1 
 %              [du1/dy | du2/dy | du3/dy]    <-for quadrature 1
-%              [.....  | .....  |  .....]
-%              [.....  | .....  |  .....]                     
-%      du =    [.....  | .....  |  .....]                        
-%              [.....  | .....  |  .....]
-%              [.....  | .....  |  .....]
-%              [.....  | .....  |  .....]
-%              [.....  | .....  |  .....]
-%           ---------------------------------
 %              [du1/dz | du2/dz | du3/dz]    <-for quadrature 1
+%            ------------------------------
+%              [du1/dx | du2/dx | du3/dx]    <-for quadrature 2 
+%              [du1/dy | du2/dy | du3/dy]    <-for quadrature 2
+%              [du1/dz | du2/dz | du3/dz]    <-for quadrature 2
+%            ------------------------------
+%              [.....  | .....  |  .....]           .
+%              [.....  | .....  |  .....]           .
+%              [.....  | .....  |  .....]           .
+%            ------------------------------
+%              [.....  | .....  |  .....]           .
+%              [.....  | .....  |  .....]           .                  
+%      du =    [.....  | .....  |  .....]           .
+%            ------------------------------
 %              [.....  | .....  |  .....]
 %              [.....  | .....  |  .....]
 %              [.....  | .....  |  .....]
+%            ------------------------------
 %              [.....  | .....  |  .....]
 %              [.....  | .....  |  .....]
 %              [.....  | .....  |  .....]
+%            ------------------------------
 %              [.....  | .....  |  .....]
-%              
+%              [.....  | .....  |  .....]
+%              [.....  | .....  |  .....]
+%            ------------------------------
+%              [.....  | .....  |  .....]          .
+%              [.....  | .....  |  .....]          .
+%              [.....  | .....  |  .....]          .
+%   
+%
+%   du and dXdx have the same layout
+%             
     
    nu = phys.nu;
    E = phys.E;
@@ -38,30 +47,22 @@ function [usrfStored, f1] = HyperFS_cur(du, dXdx, wdetj, phys)
    Kbulk=E/(3*(1-2*nu));
    lambda=(3*Kbulk-TwoMu)/3;
 
-   gradu=  0*du; %Allocate sapce for gradu that gets computed here
-   usrfStored = 0*du;
-   f1 = 0*du; %This dvdX in libCEED
-   J = 0*wdetj; %Allocate space for J = det(F)
+   gradu=  0*du;      %Allocate sapce for gradu computed here
+   usrfStored = 0*du; %Allocate space for usrfStored as output for HyperFSF_dF 
+   f1 = 0*du;         %f1 is dvdX = dXdx * P * wdetj (libCEED notation)
+   J = 0*wdetj;       %Allocate space for J = det(F)
    [r,c] = size(du);
    blk = r/c; 
-   idx = reshape(reshape(1:r,blk,c)',[],1); 
-   permuted_du = du(idx,:);
-   permuted_dXdx = dXdx(idx,:);
    
    for i = 1:blk
-     du_tmp= permuted_dXdx((i-1)*c+1:i*c,:) * permuted_du((i-1)*c+1:i*c,:);
-     gradu(idx((i-1)*c+1:i*c),:) = du_tmp;
-     usrfStored((i-1)*c+1:i*c,:) = du_tmp; % store for HyperFS_dF
+     du_tmp= dXdx((i-1)*c+1:i*c,:) * du((i-1)*c+1:i*c,:);
+     gradu((i-1)*c+1:i*c,:) = du_tmp;
+     usrfStored((i-1)*c+1:i*c,:) = du_tmp; 
      F = eye(3) + du_tmp;
      J(i) = det(F);
      b = F * F';
-     %C_inv = C\eye(3);
      tau = muu * b - (muu - 2*lambda*log(J(i)))*eye(3);
-     %S = muu*eye(3) + (lambda*log(J(i))-muu)*C_inv;
-     %P = F * S;
-     %tau = P * F';
-     %f1 is dvdX meaning dXdx^T * P * wdetj 
-     f1(idx((i-1)*c+1:i*c),:) = (permuted_dXdx((i-1)*c+1:i*c,:)'* tau * wdetj(i))/J(i);
+     f1((i-1)*c+1:i*c,:) = (dXdx((i-1)*c+1:i*c,:)'* tau * wdetj(i))/J(i);
    end
        
 end

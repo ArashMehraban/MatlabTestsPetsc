@@ -44,13 +44,10 @@ function [usrfStored, f1] = HyperFS(du, dXdx, wdetj, phys)
    J = 0*wdetj; %Allocate space for J = det(F)
    [r,c] = size(du);
    blk = r/c; 
-   idx = reshape(reshape(1:r,blk,c)',[],1); 
-   permuted_du = du(idx,:);
-   permuted_dXdx = dXdx(idx,:);
    
    for i = 1:blk
-     du_tmp= permuted_dXdx((i-1)*c+1:i*c,:) * permuted_du((i-1)*c+1:i*c,:);
-     gradu(idx((i-1)*c+1:i*c),:) = du_tmp;
+     du_tmp= dXdx((i-1)*c+1:i*c,:) * du((i-1)*c+1:i*c,:);
+     gradu((i-1)*c+1:i*c,:) = du_tmp;
      usrfStored((i-1)*c+1:i*c,:) = du_tmp; % store for HyperFS_dF
      F = eye(3) + du_tmp;
      J(i) = det(F);
@@ -59,7 +56,7 @@ function [usrfStored, f1] = HyperFS(du, dXdx, wdetj, phys)
      S = muu*eye(3) + (lambda*log(J(i))-muu)*C_inv;
      P = F * S;
      %f1 is dvdX meaning dXdx^T * P * wdetj 
-     f1(idx((i-1)*c+1:i*c),:) = permuted_dXdx((i-1)*c+1:i*c,:)'* P * wdetj(i);
+     f1((i-1)*c+1:i*c,:) = dXdx((i-1)*c+1:i*c,:)'* P * wdetj(i);
    end
        
 end
