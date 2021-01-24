@@ -17,13 +17,19 @@ phys.E = 1;
 %if nonlinear problem store gradu or tensor C 
 store = 0; 
 
-%NOTE: You can use MATLAB's nonlinear solver fsolve to test the correctness
-%      of the residual evaluation function (get_global_res) by setting
-%      the KSPS_type = 'newton_override'. With that option, solve time will
-%      increase especially for larger meshes and the action of Jacobian
-%      function (get_global_Jv) will be ignored.
+%NOTE for testing: 
+% To test userf implementation, choose:
+%  solver.KSP_type = 'test_res';
+%  This will ignore userdf implementation and uses MATLAB's fsolve.
+%
+% % To test userdf implementation, choose:
+%  solver.KSP_type = 'test_jac';
+%  This assumes userf implementation is correct and assembles a global
+%  Jacobian for each step (solver.numSteps) and compares it the 
+%  global Jacobian computed from fslove and residual evaluation.
+%
 solver=struct();
-solver.KSP_type = 'gmres'; %solver.KSP_type = 'newton_override'; for fsolve
+solver.KSP_type = 'gmres'; 
 solver.KSP_max_iter = 225;
 solver.nonlinear_max_iter=10;
 solver.global_res_tol = 1.0e-6;
@@ -34,8 +40,7 @@ solver.numSteps = 1;
 degree = 1;  % 1 for Hex8, 2 for Hex27 
 P = degree +1;
 % Use this mesh for MMS
-[~ , msh] = get_mesh('cylinder8_368e_us','exo','lex');
-%[~ , msh] = get_mesh('cube8_8','exo','lex');
+[~ , msh] = get_mesh('cylinder8_110e_us','exo','lex');
 
 dof = 3;
 %get all Dirichlet boundary node sets
@@ -50,7 +55,7 @@ given_u{3}=@(x,y,z)exp(4*z).*sin(2*x).*cos(3*y);
 %get constructed dir_bndry_vals and exac Solutions on remaining nodes 
 [dir_bndry_val, exactSol] = get_exact_sol(msh,dir_bndry_nodes, given_u);
 
-[fem_sol, Jac] =  get_fem_sol(msh, dof, dir_bndry_nodes, dir_bndry_val,P,userf,userdf,usrf_force, solver, phys, store);
+[fem_sol, JACOB__] =  get_fem_sol(msh, dof, dir_bndry_nodes, dir_bndry_val,P,userf,userdf,usrf_force, solver, phys, store);
 
 error = norm(exactSol - fem_sol)/norm(fem_sol);
 L2ErrMsg = strcat('L2 Error: ', num2str(error));
