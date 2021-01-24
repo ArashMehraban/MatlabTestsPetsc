@@ -35,19 +35,23 @@ function f = LinElas_dF(dlta_ue,ddu, stored ,dXdx, wdetj, phys)
    %ddu is variation of du
    graddu=  0*ddu; %Allocate sapce for gradu that gets computed here
    gradduT= 0*ddu; %Allocate space for Transpose of gradu
-   sigma = 0*ddu; %Allocate sapce for sigma computation
-   f_sigma = 0*ddu; %This dvdX in libCEED
+   dsigma = 0*ddu; %Allocate sapce for sigma computation
+   f_dsigma = 0*ddu; %This dvdX in libCEED
    [r,c] = size(ddu);
    blk = r/c; 
-   idx = reshape(reshape(1:r,blk,c)',[],1); 
-   permuted_ddu = ddu(idx,:);
-   permuted_dXdx = dXdx(idx,:);
+%    idx = reshape(reshape(1:r,blk,c)',[],1); 
+%    permuted_ddu = ddu(idx,:);
+%    permuted_dXdx = dXdx(idx,:);
    
    for i = 1:blk
-     tmp= permuted_dXdx((i-1)*c+1:i*c,:) * permuted_ddu((i-1)*c+1:i*c,:);
-     graddu(idx((i-1)*c+1:i*c),:) = tmp;
-     gradduT(idx((i-1)*c+1:i*c),:) = tmp';
-     permuted_dXdxT((i-1)*c+1:i*c,:) = permuted_dXdx((i-1)*c+1:i*c,:)';
+%      tmp= permuted_dXdx((i-1)*c+1:i*c,:) * permuted_ddu((i-1)*c+1:i*c,:);
+     tmp= dXdx((i-1)*c+1:i*c,:) * ddu((i-1)*c+1:i*c,:);
+%      graddu(idx((i-1)*c+1:i*c),:) = tmp;
+     graddu((i-1)*c+1:i*c,:) = tmp;
+%      gradduT(idx((i-1)*c+1:i*c),:) = tmp';
+     gradduT((i-1)*c+1:i*c,:) = tmp';
+%      permuted_dXdxT((i-1)*c+1:i*c,:) = permuted_dXdx((i-1)*c+1:i*c,:)';
+     dXdxT((i-1)*c+1:i*c,:) = dXdx((i-1)*c+1:i*c,:)';
    end
    
    e = 0.5 * (graddu+gradduT); %strain
@@ -57,28 +61,32 @@ function f = LinElas_dF(dlta_ue,ddu, stored ,dXdx, wdetj, phys)
    ss = E / ((1 + nu)*(1 - 2*nu));
    
    for i=1:blk
-       tmp = e(idx((i-1)*c+1:i*c),:);
-       sigma11 = ss*((1 - nu)*tmp(1,1) + nu*tmp(2,2) + nu*tmp(3,3)); 
-       sigma22 = ss*(nu*tmp(1,1)+ (1 - nu)*tmp(2,2) + nu*tmp(3,3));
-       sigma33 = ss*(nu*tmp(1,1) + nu*tmp(2,2) + (1 - nu)*tmp(3,3));
-       sigma23 = ss*(1 - 2*nu)*tmp(2,3)*0.5;
-       sigma13 = ss*(1 - 2*nu)*tmp(1,3)*0.5;
-       sigma12 = ss*(1 - 2*nu)*tmp(1,2)*0.5;
-       sigma3x3 = [sigma11 sigma12 sigma13;
-                   sigma12 sigma22 sigma23;
-                   sigma13 sigma23 sigma33];               
-       sigma(idx((i-1)*c+1:i*c),:) = sigma3x3;
+%        tmp = e(idx((i-1)*c+1:i*c),:);
+       tmp = e((i-1)*c+1:i*c,:);
+       dsigma11 = ss*((1 - nu)*tmp(1,1) + nu*tmp(2,2) + nu*tmp(3,3)); 
+       dsigma22 = ss*(nu*tmp(1,1)+ (1 - nu)*tmp(2,2) + nu*tmp(3,3));
+       dsigma33 = ss*(nu*tmp(1,1) + nu*tmp(2,2) + (1 - nu)*tmp(3,3));
+       dsigma23 = ss*(1 - 2*nu)*tmp(2,3)*0.5;
+       dsigma13 = ss*(1 - 2*nu)*tmp(1,3)*0.5;
+       dsigma12 = ss*(1 - 2*nu)*tmp(1,2)*0.5;
+       dsigma3x3 = [dsigma11 dsigma12 dsigma13;
+                   dsigma12 dsigma22 dsigma23;
+                   dsigma13 dsigma23 dsigma33];               
+%        dsigma(idx((i-1)*c+1:i*c),:) = dsigma3x3;
+       dsigma((i-1)*c+1:i*c,:) = dsigma3x3;
    end
    
    for i = 1:blk
-     tmp= permuted_dXdxT((i-1)*c+1:i*c,:) * sigma(idx((i-1)*c+1:i*c),:);
-     f_sigma(idx((i-1)*c+1:i*c),:) = tmp*wdetj(i);
+%      tmp= permuted_dXdxT((i-1)*c+1:i*c,:) * dsigma(idx((i-1)*c+1:i*c),:);
+     tmp= dXdxT((i-1)*c+1:i*c,:) * dsigma((i-1)*c+1:i*c,:);
+%      f_dsigma(idx((i-1)*c+1:i*c),:) = tmp*wdetj(i);
+     f_dsigma((i-1)*c+1:i*c,:) = tmp*wdetj(i);
    end
    
     fu1 = 0*dlta_ue(:,1);
     fu2 = 0*dlta_ue(:,2);
     fu3 = 0*dlta_ue(:,3);
    
-   f = [  fu1      fu2      fu3; f_sigma];
+   f = [  fu1      fu2      fu3; f_dsigma];
 
 end
