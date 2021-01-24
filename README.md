@@ -6,7 +6,7 @@ Current configuration code is work in progress! Its residual evaluation is corre
 
 Try:
 
-\tt{runLinElas.m} to run 3D Linear Elasticity problem
+\t{runLinElas.m} to run 3D Linear Elasticity problem
 
 runHyperFS\_ref.m to run Neo-Hookean Hyperelasticity at finite strain using reference config
 
