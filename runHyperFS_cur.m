@@ -4,14 +4,10 @@ clear
 clc
 format short
 
-%degree of accuracy to solve with
-degree = 1;
-P = degree +1;
-
 %physic implementation for residual evaluation
-userf= @HyperFS_cur;
+userf= @HyperFSF_cur;
 %physic implementation for Jacobian and action of Jacobian evaluation
-userdf=@HyperFS_dF_cur;
+userdf=@HyperFSF_dF_cur;
 %Forcing function
 usrf_force=@HyperFS_force; 
 %Phyics parameter
@@ -28,13 +24,16 @@ store = 1;
 %      increase especially for larger meshes and the action of Jacobian
 %      function (get_global_Jv) will be ignored. 
 solver=struct();
-solver.KSP_type = 'newton_override';
+solver.KSP_type = 'gmres';
 solver.KSP_max_iter = 225;
 solver.nonlinear_max_iter=15;
 solver.global_res_tol = 1.0e-6;
 solver.precond = 'OFF';
 solver.numSteps = 1;
 
+%degree of accuracy to solve with
+degree = 1;
+P = degree +1;
 [~ , msh] = get_mesh('cube8_8','exo','lex');
 
 dof = 3;
