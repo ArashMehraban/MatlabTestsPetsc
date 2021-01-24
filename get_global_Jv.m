@@ -20,7 +20,15 @@ function Jv = get_global_Jv(dlta_u, global_idx_map, msh,P, userdf,phys, stored)
      
      %get Weights, Basis (B) functions and their Derivatives (D0, D1 and D2)
      %D = partial_B/partial_x_i
-     [B, D, W] = get_shape(P, msh.num_dims);
+     [B, D_hat, W] = get_shape(P, msh.num_dims);
+     
+     r = size(D_hat,1);
+     c = msh.num_dims;
+     blk = r/c; 
+     idx = reshape(reshape(1:r,blk,c)',[],1); 
+     
+     %interlace D
+     D = D_hat(idx,:); 
   
                
      for i=1:msh.num_elem

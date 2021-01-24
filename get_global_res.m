@@ -20,14 +20,23 @@ function [global_res, stored] = get_global_res(u, global_idx_map, msh, dir_bndry
        
      %get Weights, Basis (B) functions and their Derivatives (D0, D1 and D2)
      %D = partial_B/partial_x_i
-     [B, D, W] = get_shape(P, msh.num_dims);
+     [B, D_hat, W] = get_shape(P, msh.num_dims);
      
      %allocate space for storage of gradu or tensor C if needed
      if store == 1
-        stored = zeros(msh.num_elem*size(D,1) , size(global_idx_map,2));
+        stored = zeros(msh.num_elem*size(D_hat,1) , size(global_idx_map,2));
      else
          stored = 0;
      end
+     
+     r = size(D_hat,1);
+     c = msh.num_dims;
+     blk = r/c; 
+     idx = reshape(reshape(1:r,blk,c)',[],1); 
+     
+     %interlace D
+     D = D_hat(idx,:); 
+     
      
      for i=1:msh.num_elem
                    
