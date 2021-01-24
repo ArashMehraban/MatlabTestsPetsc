@@ -1,4 +1,4 @@
-function[origConn, msh] = get_mesh(filename, ext, varargin)
+function [origConn, msh] = get_mesh(filename, ext, varargin)
 %GET_MESH function receives an exodus format file (.exo or .e) as input and
 %returns as output a mesh object that can be used in MATLAB with finite
 %element code. The output mesh object contains:
@@ -93,32 +93,33 @@ function[origConn, msh] = get_mesh(filename, ext, varargin)
         mesh_data{i+1} = netcdf.getVar(ncid, var_ID(i+1));
     end
     
+    %build a map of all var_names
+    M = containers.Map(var_names,zeros(size(var_names,1),1));
+    
     %get number of nodes in element
     num_node_per_elem = dimen_lens((strncmp(dimen_names,'num_nod_per_el',11)));
     %get connectivity matrix
     conn = mesh_data{strncmp(var_names,'connect',7)}';
     origConn = conn;
-    %get vertx coordinates
-    if(sum(strcmp(var_names,'coordx')) == 1)
-        dim = dimen_lens(strcmp(dimen_names, 'num_dim'));
-        if(dim == 3)
-            coords = [mesh_data{strcmp(var_names,'coordx')},...
-                      mesh_data{strcmp(var_names,'coordy')},...
-                      mesh_data{strcmp(var_names,'coordz')}] ; 
-        end
-        if(dim == 2)
-            coords = [mesh_data{strcmp(var_names,'coordx')},...
-                      mesh_data{strcmp(var_names,'coordy')}];
-        end
-    else
-         coords = mesh_data{strcmp(var_names,'coord')};
-    end
+    
     %get number of elelments
     num_elem = dimen_lens(strcmp(dimen_names,'num_elem')); 
     %get number of nodes in mesh
     num_nods = dimen_lens(strcmp(dimen_names,'num_nodes'));
     %get the problem dimension (2D, 3D)
     num_dim = dimen_lens(strcmp(dimen_names,'num_dim'));
+    %get vertx coordinates
+    TF = isKey(M,'coord');
+    if(TF==1)
+        coords = mesh_data{strcmp(var_names,'coord')};
+    elseif(num_dim == 1)
+        coords = mesh_data{strcmp(var_names,'coordx')};        
+    elseif(num_dim == 2)
+        coords = [mesh_data{strcmp(var_names,'coordx')},mesh_data{strcmp(var_names,'coordy')}];
+    elseif(num_dim == 3)
+        coords = [mesh_data{strcmp(var_names,'coordx')},mesh_data{strcmp(var_names,'coordy')}, mesh_data{strcmp(var_names,'coordz')}];        
+    end
+    
     
     %get the array indecies of the node sets in netCDF variables
     ns_idx= find(strncmp(var_names,'node_ns',7));
@@ -150,7 +151,7 @@ function[origConn, msh] = get_mesh(filename, ext, varargin)
     end
     
     %Allocate space for each element set (correspondin to side sets)
-    elem_side_set = cell(1,sz_elem_idx);    
+    elem_side_set = cell(1,sz_elem_idx);
     %populate each element set (correspondin to side sets)
     for i =1:sz_elem_idx
         elem_side_set{i} = mesh_data{elem_idx(i)};
