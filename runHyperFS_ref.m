@@ -40,7 +40,7 @@ solver.numSteps = 1;
 %degree of accuracy to solve with
 degree = 1; % 1 for Hex8, 2 for Hex27
 P = degree +1;
-[~ , msh] = get_mesh('cube8_8','exo','lex');
+[~ , msh] = get_mesh('cube8_16','exo','lex');
 
 dof = 3;
 %get all Dirichlet boundary node sets
@@ -49,7 +49,7 @@ dir_bndry_nodes = get_all_dir_ns(msh);
 %NOTE: modify userf function according to given_u
 given_u{1}=@(x,y,z)0;
 given_u{2}=@(x,y,z)0;
-given_u{3}=@(x,y,z)0.5*z;
+given_u{3}=@(x,y,z)0.5*x;
 %get vertex coordinates from mesh                                     
 
 [dir_bndry_val, ~] = get_exact_sol(msh,dir_bndry_nodes, given_u);
