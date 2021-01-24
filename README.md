@@ -8,9 +8,9 @@ Try:
 
 `runLinElas.m` to run 3D Linear Elasticity problem
 
-`runHyperFS\_ref.m` to run Neo-Hookean Hyperelasticity at finite strain using reference config
+`runHyperFS_ref.m` to run Neo-Hookean Hyperelasticity at finite strain using reference config
 
-`runHyperFS\_cur.m` to run Neo-Hookean Hyperelasticity at finite strain using current config
+`runHyperFS_cur.m` to run Neo-Hookean Hyperelasticity at finite strain using current config
 
 This is done using Dirichlet Boundary conditions only. No Neumann yet!
 
