@@ -60,17 +60,20 @@ function f = HyperFSF_dF_cur(dlta_ue,ddu, stored ,dXdx, wdetj, phys)
    for i = 1:blk
      ddu_tmp= dXdx((i-1)*c+1:i*c,:) * ddu((i-1)*c+1:i*c,:);
      graddu((i-1)*c+1:i*c,:) = ddu_tmp;
-     F = eye(3) + stored((i-1)*c+1:i*c,:);  % gradu computed in HyperFS_cur
-     delta_b = (ddu_tmp * F' + F * ddu_tmp');
-     J(i) = det(F);
+     F = eye(3) + stored((i-1)*c+1:i*c,:);  % gradu computed in HyperFSF_cur
+%      delta_b = (ddu_tmp * F' + F * ddu_tmp');
      b = F * F';
+     delta_b = (ddu_tmp * b + b' * ddu_tmp');
+     J(i) = det(F);
      F_inv = F\I3; 
      tau = muu * b - (muu - 2*lambda*log(J(i)))*eye(3);
      %dtau = mu*delta_b + 2lambda * F^(-T) dF (Note: dF = ddu_tmp)
-     Finv_contract_deltaF = sum(sum(F_inv' .* ddu_tmp));
+     Finv_contract_deltaF = sum(sum(F_inv' .* (ddu_tmp * F)));
      %dtau = muu *delta_b + 2* lambda * F_inv' * ddu_tmp;
      dtau = muu *delta_b + 2* lambda * Finv_contract_deltaF * I3;
-     dstress = -ddu_tmp * F_inv * tau + dtau;
+     %dF_contract_tau = sum(sum(-ddu_tmp * F_inv .* tau));
+     dstress = -ddu_tmp * tau + dtau;
+     %dstress = dF_contract_tau + dtau;
      fds((i-1)*c+1:i*c,:) = (dXdx((i-1)*c+1:i*c,:)'* dstress * wdetj(i))/J(i);
    end
    
