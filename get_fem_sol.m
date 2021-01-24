@@ -1,51 +1,55 @@
 function [u,JACOB__] =  get_fem_sol(msh, dof, dir_bndry_nodes, dir_bndry_val,P,userf,userdf,usrf_force,solver, phys, store)
-%GET_FEM_SOL returns the solution to the PDE
+%GET_FEM_SOL returns the FEM solution to the PDE and gobal Jacobian if
+%desired.
 %
-%input :                msh: mesh object
-%      :         sz_u_field: size of unknown field (eg. : Poisson 1, Plane Strain 2)
-%      :    dir_bndry_nodes: Dirichlet Boundary nodes
-%      :      dir_bndry_val: Dirichlet Boundary values
-%      :num_quadr_pts_in_1d: number of quadrature points in 1 dimension
-%      :              userf: any knowns physics resources as a function input for global residual 
-%      :             userdf: any knowns physics resources as a function inout for consistent tangent 
-%      :     solver.KSP_max_iter: user specified maximum number of itertions before GMRES stops     
-%      :        max_iter_nw: user specified maximum number newton steps before Newton stops
-%      :     global_res_tol: user specified tolerance for norm of global_res before solver stops  
+%input :            msh: mesh object
+%      :            dof: size of unknown field (eg. : Poisson 1, Plane Strain 2)
+%      :dir_bndry_nodes: Dirichlet Boundary nodes
+%      :  dir_bndry_val: Dirichlet Boundary values
+%      :              P: number of quadrature points in 1 dimension
+%      :          userf: user-implemented physics for residual evaluation 
+%      :         userdf: user-implemented physics for global Jacobian evaluation (the derivative of userf)
 %
 %output:              u: FEM Solution u
-%           gl_res_norm: An array where each element contains the global residual norm after an iteration of GMRES
 %               JACOB__: Jacobian of the system returned by the solver
 %
-% NOTE: return values that end with __ (e.g. JACOB__) are not intended to
-% be used in the program per se. Be very careful before using them. 
+    
+  %u: initial unknown vector 
+  %global_idx_map: dof-map for local-to-global and global-to-local
+  [u, global_idx_map] = get_global_map(msh.num_nodes,dir_bndry_nodes,dof);
+  
+  t = linspace(0,1,solver.numSteps+1);
+  dt = t(:,2:end);
+     
+  step_dir_bndry_val = dir_bndry_val;
+  
+  %For testing userdf in get_global_Jv (action of Jacobian)
+  %Allocating Space
+  if(strcmp(solver.KSP_type,'test_jac'))
+      stepJacs = cell(solver.numSteps,1);
+      for m=1:solver.numSteps
+          stepJacs{m}= zeros(size(u,1),size(u,1));
+      end
+      Iu = eye(size(u,1),size(u,1));
+      
+      JACOB__ = struct();
+      JACOB__.stepJacs = stepJacs;
+      JACOB__.stepFsolveJacs = stepJacs;
+      JACOB__.diff_norms = zeros(solver.numSteps,1);
+      JACOB__.diff_norms_computation = 'norm(JACOB__.stepFsolveJacs{step_i} -JACOB__.stepJacs{step_i})/norm(JACOB__.stepJacs{step_i})';
+  end
 
-
-% % % % % % % % solver = {'gmres', solver.KSP_max_iter,max_iter_nw,tol,global_res_tol};
+  for m=1:solver.numSteps
     
-  %get number of nodes in mesh
-  num_nodes = msh.num_nodes;  
-    
-    
-  %get the unknown u guess vector and global to local mapping for each u
-  [u, global_idx_map] = get_global_map(num_nodes,dir_bndry_nodes,dof);
+    if solver.numSteps>1
+      for ii=1:size(dir_bndry_val,1)
+         step_dir_bndry_val{ii} = dir_bndry_val{ii}*dt(m);
+      end
+    end
    
-  if(strcmp(solver.KSP_type,'gmres'))      
+    if(strcmp(solver.KSP_type,'gmres'))      
       if solver.precond == 1   
          Jac = assemble_global_jac(size(u,1),global_idx_map, msh,P,dof);
-      end
-      
-        
-     t = linspace(0,1,solver.numSteps+1);
-     dt = t(:,2:end);
-     
-     step_dir_bndry_val = dir_bndry_val;
-
-     for m=1:solver.numSteps
-    
-      if solver.numSteps>1
-        for ii=1:size(dir_bndry_val,1)
-           step_dir_bndry_val{ii} = dir_bndry_val{ii}*dt(m);
-        end
       end
     
         iter=1;
@@ -112,27 +116,32 @@ function [u,JACOB__] =  get_fem_sol(msh, dof, dir_bndry_nodes, dir_bndry_val,P,u
             
             iter=iter+1;
         end
-     end
-  end
-  
-  if(strcmp(solver.KSP_type,'newton_override'))
-        
-      t = linspace(0,1,solver.numSteps+1);
-      dt = t(:,2:end);
-     
-      step_dir_bndry_val = dir_bndry_val;
-
-      for m=1:solver.numSteps
-    
-        if solver.numSteps>1
-            for ii=1:size(dir_bndry_val,1)
-                step_dir_bndry_val{ii} = dir_bndry_val{ii}*dt(m);
-            end
-        end
-        
-        fun = @(u)get_global_res(u, global_idx_map, msh, step_dir_bndry_val,P,userf,usrf_force,phys, store);
-        %options = optimoptions(@fsolve,'Algorithm','Levenberg-Marquardt');%, 'TolX',tol); %,'Jacobian','on');
-        [u,~,~,~,JACOB__] = fsolve(fun, u);% ,options);
-      end
-   end
+    end %end for if gmres solver
+   
+   %For testing global residual evaluation. This will ignore get_global_Jv
+   if(strcmp(solver.KSP_type,'test_res'))
+      fun = @(u)get_global_res(u, global_idx_map, msh, step_dir_bndry_val,P,userf,usrf_force,phys, store);
+      %options = optimoptions(@fsolve,'Algorithm','Levenberg-Marquardt');%, 'TolX',tol); %,'Jacobian','on');
+      [u,~,~,~,JACOB__] = fsolve(fun, u);% ,options);
+   end %end of if(strcmp(solver.KSP_type,'test_res'))
+   
+   %For testing action of global Jacobian. This assumes global residual
+   %evaluation is correctly implemented and compare the global Jacobian
+   %produced from get_global_Jv with JACOB__ from fsolve 
+   if(strcmp(solver.KSP_type,'test_jac'))
+       %compute golbal residual for each step
+       [~, stored] = get_global_res(u, global_idx_map, msh, step_dir_bndry_val,P,userf,usrf_force,phys, store);
+       %populate global Jacobian based on the global residual for each step
+       for i=1:size(u,1)
+           JACOB__.stepJacs{m}(i,:)=get_global_Jv(Iu(:,i), global_idx_map, msh,P, userdf,phys, stored);
+       end
+       %Jacobian from fsolve for each step
+       fun = @(u)get_global_res(u, global_idx_map, msh, step_dir_bndry_val,P,userf,usrf_force,phys, store);
+       [u,~,~,~,fsolvJ] = fsolve(fun, u);% 
+       JACOB__.stepFsolveJacs{m} = fsolvJ; 
+       
+       %norm of difference between stepFsolveJacs and stepJacs
+       JACOB__.diff_norms(m) = norm(JACOB__.stepFsolveJacs{m} -JACOB__.stepJacs{m})/norm(JACOB__.stepJacs{m});
+   end %if(strcmp(solver.KSP_type,'test_jac'))   
+  end %end for numSteps for-loop
 end
