@@ -6,11 +6,11 @@ Current configuration code is work in progress! Its residual evaluation is corre
 
 Try:
 
-runLinElas.m to run 3D Linear Elasticity problem
+\tt{runLinElas.m} to run 3D Linear Elasticity problem
 
 runHyperFS\_ref.m to run Neo-Hookean Hyperelasticity at finite strain using reference config
 
 runHyperFS\_cur.m to run Neo-Hookean Hyperelasticity at finite strain using current config
 
-This is done usinf Dirichlet Boundary conditions only. No Neumann yet!
+This is done using Dirichlet Boundary conditions only. No Neumann yet!
 
