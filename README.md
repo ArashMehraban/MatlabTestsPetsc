@@ -10,7 +10,7 @@ Try:
 
 `runHyperFS_ref.m` to run Neo-Hookean Hyperelasticity at finite strain using reference config
 
-`runHyperFS_cur.m` to run Neo-Hookean Hyperelasticity at finite strain using current config
+`runHyperFS_ref_dav.m` to run Neo-Hookean Hyperelasticity at finite strain using Davydov Algorithm 2 
 
 This is done using Dirichlet Boundary conditions only. No Neumann yet!
 
