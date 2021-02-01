@@ -65,7 +65,7 @@ function f = HyperFSF_dF_ref_dav(dlta_ue,ddu, stored ,dXdx, wdetj, phys)
      Graddu((i-1)*c+1:i*c,:) = ddu_tmp;  %ref config
      
      F = stored((i-1)*c+1:i*c,:); % F computed in HyperFS_ref_dav
-     dX_ref_dx_cur = dXdx((i-1)*c+1:i*c,:) * F\I3;    %inv_jac_wrt_cur
+     dX_ref_dx_cur = dXdx((i-1)*c+1:i*c,:) * (inv(F));    %inv_jac_wrt_cur
      F_inv=F\I3;
      J(i) = det(F);
      b = F*F';
@@ -75,6 +75,8 @@ function f = HyperFSF_dF_ref_dav(dlta_ue,ddu, stored ,dXdx, wdetj, phys)
      %where:
      % dcF  =   drF   * F_inv 
      graddu = ddu_tmp * F_inv;
+     
+     %dtau = as function of 
      
      delta_b = (graddu * b + b * graddu'); % current config
      

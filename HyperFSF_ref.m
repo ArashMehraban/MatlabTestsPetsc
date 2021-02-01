@@ -59,12 +59,14 @@ function [usrfStored, f1] = HyperFSF_ref(du, dXdx, wdetj, phys)
    for i = 1:blk
      du_tmp= dXdx((i-1)*c+1:i*c,:) * du((i-1)*c+1:i*c,:);
      gradu((i-1)*c+1:i*c,:) = du_tmp;
-     usrfStored((i-1)*c+1:i*c,:) = du_tmp; 
+     usrfStored((i-1)*c+1:i*c,:) = du_tmp;
+     %dX_ref/dX_current = (dX_ref/dx_initial) (dx_initial/dx_current)
      F = eye(3) + du_tmp;
      J(i) = det(F);
      C = F' * F;
      C_inv = C\I3;
      S = muu*I3 + (lambda*log(J(i))-muu)*C_inv;
+     %tau = F*S*F'; %strore
      P = F * S;  
      f1((i-1)*c+1:i*c,:) = dXdx((i-1)*c+1:i*c,:)'* P * wdetj(i);
    end
