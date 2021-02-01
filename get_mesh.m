@@ -1,4 +1,5 @@
-function [origConn, msh] = get_mesh(filename, ext, varargin)
+% function [origConn, msh] = get_mesh(filename, ext, varargin)
+function [origConn, msh] = get_mesh(filename, varargin)
 %GET_MESH function receives an exodus format file (.exo or .e) as input and
 %returns as output a mesh object that can be used in MATLAB with finite
 %element code. The output mesh object contains:
@@ -35,28 +36,27 @@ function [origConn, msh] = get_mesh(filename, ext, varargin)
 % the keyword 'lex' as an optional input parameter described below:
 % 
 % inputs: (necessary): filename 
-%       : (necessary): ext (file extension) 
 %       : (optional):  lex (optional for lexicographical ordering) 
 %
 % output: mesh object (struct)
 %   
 % example on how to use the function: 
-%    filename = 'disk';
-%    ext = 'exo';
-%    msh = get_mesh(filename,ext);  
+%    filename = 'disk.exo';
+%    msh = get_mesh(filename);  
 %    or
-%    msh = get_mesh(filename,ext,'lex');  (for lexicographical ordering)
+%    msh = get_mesh(filename,'lex');  (for lexicographical ordering)
 %
 % Developed by Arash Mehraban, University of Colorado, Boulder (April 2016)
 
 
     %open exodus file
-    if(~(strcmp(ext,'exo') || strcmp(ext,'e')))
+    if(~(strcmp(filename(end-3:end),'.exo') || strcmp(filename(end-1:end),'.e')))
         error('Wrong file format input. get_mesh can read .exo and .e files only!!')
     end
     
     %get file handle
-    ncid = netcdf.open(strcat(filename,'.',ext));
+    ncid = netcdf.open(filename);
+
 
     % netCDF files have three header sections:
     % 1) dimensions
@@ -128,6 +128,9 @@ function [origConn, msh] = get_mesh(filename, ext, varargin)
     %get the array indecies of the element sets in netCDF variables
     elem_idx= find(strncmp(var_names,'elem_ss',7));
     
+    props_idx= strcmp(var_names,'ns_prop1');
+    props = mesh_data{props_idx}; 
+    
     %get size of node, side and element sets
     sz_ns_idx = size(ns_idx,1);
     sz_ss_idx = size(ss_idx,1);
@@ -139,6 +142,7 @@ function [origConn, msh] = get_mesh(filename, ext, varargin)
     for i =1:sz_ns_idx
         node_set{i} = mesh_data{ns_idx(i)};
     end
+    
      
     %Allocate space for side sets sizes
     side_set_szs = zeros(1,sz_ss_idx);
@@ -163,7 +167,7 @@ function [origConn, msh] = get_mesh(filename, ext, varargin)
     side_set_nodes=cell(1,ss_nod_sz);    
     
     % check if lexicographical (LEX) ordering mesh is requested
-    if(nargin >2)
+    if(nargin >1)
         lex = varargin{1};
         if(~strcmp(lex,'lex'))
             error('Ordering was not recognized. Choose lex for lexicographical ordering!')
@@ -281,7 +285,7 @@ function [origConn, msh] = get_mesh(filename, ext, varargin)
    % get node set variable names from netCDF variables
    ns_names=cell(1,sz_ns_idx);
    for i=1:sz_ns_idx
-       ns_names{i}= var_names{ns_idx(i)};
+         ns_names{i}= strcat('ns', num2str(props(i)));
    end
    
    % get element variable names from netCDF variables
@@ -370,6 +374,9 @@ function [origConn, msh] = get_mesh(filename, ext, varargin)
     for i=1:size(field_names,2)
         msh.(field_names{i}) = field_vals{i};
     end
+    msh.ns_names = ns_names; 
+    msh.apply_boundary_on = 0;
+    msh.boundary_funtions = 0;
 
     %close the file
     netcdf.close(ncid);
