@@ -14,3 +14,4 @@ Try:
 
 This is done using Dirichlet Boundary conditions only. No Neumann yet!
 
+![] HyperFS_ref_dav.gif
