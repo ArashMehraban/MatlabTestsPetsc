@@ -1,0 +1,1 @@
+I use ffmpeg -i file.ogv file.gif to create a gif that will auto-play (replace file.ogv with file.avi if that's what you had Paraview write).
