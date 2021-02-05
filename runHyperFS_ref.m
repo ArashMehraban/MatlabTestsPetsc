@@ -13,6 +13,7 @@ phys.E = 1;
 %if nonlinear problem store gradu or tensor C 
 appCtx = struct();
 appCtx.store = 1;
+appCtx.theta = 30; % in degrees as apoose to radian
 
 %NOTE for testing: 
 % To test userf implementation, choose:
@@ -26,7 +27,7 @@ appCtx.store = 1;
 %  global Jacobian computed from fslove and residual evaluation.
 %
 solver=struct();
-solver.KSP_type = 'gmres'; 
+solver.KSP_type = 'test_jac'; 
 solver.KSP_max_iter = 225;
 solver.nonlinear_max_iter=10;
 solver.global_res_tol = 1.0e-6;
@@ -37,7 +38,8 @@ solver.numSteps = 1;
 %degree of accuracy to solve with
 degree = 2;  % 1 for Hex8, 2 for Hex27 
 P = degree +1;
-[~ , msh] = get_mesh('beam27_1e_l999_r998_6ss.exo','lex');
+
+[~ , msh] = get_mesh('beam27_8e_l999_r998_6ss.exo','lex');
 
 msh = apply_boundary_on(msh, {'ns998', 'ns999'}, {@bc_zero, @bc_bend});
 
