@@ -35,9 +35,9 @@ solver.numSteps = 1;
 
 
 %degree of accuracy to solve with
-degree = 2;  % 1 for Hex8, 2 for Hex27 
+degree = 1;  % 1 for Hex8, 2 for Hex27 
 P = degree +1;
-[~ , msh] = get_mesh('beam27_8e_l999_r998_6ss.exo','lex');
+[~ , msh] = get_mesh('beam8_8e_l999_r998_6ss.exo','lex');
 
 msh = apply_boundary_on(msh, {'ns998', 'ns999'}, {@bc_zero, @bc_bend});
 

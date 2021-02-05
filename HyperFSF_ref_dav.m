@@ -66,8 +66,8 @@ function [usrfStored, f1] = HyperFSF_ref_dav(du, dXdx, wdetj, phys)
      usrfStored((i-1)*c+1:i*c,:) = F;
      J(i) = det(F);
      b = F*F';
-     tau = (muu*b + (lambda*log(J(i))-muu)*I3)/J(i);
-     f1((i-1)*c+1:i*c,:) = dX_ref_dx_cur'* tau * wdetj(i);
+     tau = (muu*b + (lambda*log(J(i))-muu)*I3);
+     f1((i-1)*c+1:i*c,:) = dXdx((i-1)*c+1:i*c,:)'* tau * wdetj(i);
    end
        
 end
