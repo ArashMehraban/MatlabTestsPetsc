@@ -40,6 +40,20 @@ function [u,JACOB__] =  get_fem_sol(msh, dof, P, userf, userdf, usrf_force, solv
   pseudo_time = linspace(0,1, solver.numSteps+1);
   load_increments = pseudo_time(:,2:end);
   
+  
+  if(isfield(appCtx,'vtk_filename'))
+      vtk_files = cell(solver.numSteps+1,1);
+      for s=1:solver.numSteps+1
+          vtk_files{s} = strcat(appCtx.vtk_filename , num2str(s), '.vtk');    
+      end
+       %Store undeformed geometry in vtk_files{1}
+        u_closure = get_closure_u(u,dofMap); 
+        %graph at no boundary applied
+        processVtk(vtk_files{1},appCtx.origConn, msh,u_closure);
+  end
+  
+ 
+  
   for m=1:solver.numSteps
     
     if(strcmp(solver.KSP_type,'gmres'))      
@@ -111,6 +125,13 @@ function [u,JACOB__] =  get_fem_sol(msh, dof, P, userf, userdf, usrf_force, solv
             
             iter=iter+1;
         end
+        
+        if(isfield(appCtx,'vtk_filename'))
+            u_closure = get_closure_u(u,dofMap); 
+            u_closure = insert_boundary(u_closure, msh, load_increments(m), appCtx);
+            processVtk(vtk_files{m+1},appCtx.origConn, msh,u_closure);
+        end
+        
     end %end for if gmres solver
    
    %For testing global residual evaluation. This will ignore compute_Jacobian_action
