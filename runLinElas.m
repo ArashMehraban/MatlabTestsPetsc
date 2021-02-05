@@ -48,7 +48,8 @@ userdf=@LinElasF_dF;
 %Forcing function
 usrf_force=@LinElas_force_MMS; 
 
-msh = apply_boundary_on(msh, {'MMS'}, {@bc_MMS});
+% MMS is a keywork meaning all nodesets. Then bc_MMS will be applied to all nodesets
+msh = apply_boundary_on(msh, {'MMS'}, {@bc_MMS}); 
 %msh = apply_boundary_on(msh, {'ns1', 'ns2'}, {@bc_zero, @bc_bend});
     
 %compute exact solution based on given_u 
