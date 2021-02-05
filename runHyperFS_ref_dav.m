@@ -26,20 +26,23 @@ appCtx.store = 1;
 %  global Jacobian computed from fslove and residual evaluation.
 %
 solver=struct();
-solver.KSP_type = 'test_jac'; 
+solver.KSP_type = 'gmres'; 
 solver.KSP_max_iter = 225;
 solver.nonlinear_max_iter=10;
 solver.global_res_tol = 1.0e-6;
 solver.precond = 'OFF';
-solver.numSteps = 1;
+solver.numSteps = 90;
 
 
 %degree of accuracy to solve with
 degree = 1;  % 1 for Hex8, 2 for Hex27 
 P = degree +1;
-[~ , msh] = get_mesh('beam8_8e_l999_r998_6ss.exo','lex');
+[origConn , msh] = get_mesh('beam8_8e_l999_r998_6ss.exo','lex');
 
-msh = apply_boundary_on(msh, {'ns998', 'ns999'}, {@bc_zero, @bc_bend});
+appCtx.origConn = origConn;
+appCtx.vtk_filename = 'HyperFS_ref_dav';
+
+msh = apply_boundary_on(msh, {'ns999', 'ns998'}, {@bc_zero, @bc_bend});
 
 dof = 3;
 
