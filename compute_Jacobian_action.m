@@ -27,7 +27,6 @@ function Jv = compute_Jacobian_action(dlta_u, msh, dofMap, P ,userdf, phys, stor
          
          %get corresponding unknown/solution u for each element
          elem_dlta_u = dlta_u_closure(elem_conn,:);
-         i;
                            
          ddu = D*elem_dlta_u; % elemt derivative
          dxdX= D*element_vtx_coords; %element
