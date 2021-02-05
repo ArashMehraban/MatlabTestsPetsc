@@ -1,6 +1,6 @@
-##############  
-#  beam-8  #
-##############
+#########################  
+#  beam-8 Testing scrip #
+#########################
 
 reset
 #1) Create a Cylinder: volume 1
@@ -22,7 +22,7 @@ mesh volume 1
 #refine volume 1 numsplit 1 bias 1.0 depth 1 smooth 
 
 #5.2) Hex27 Meshes if needed
-block 1 element type hex27
+#block 1 element type hex27
 
 #6) Specifiy nodesets for boundary
 nodeset 999 surface 4 #left
@@ -33,14 +33,13 @@ nodeset 995 surface 5 #top
 nodeset 994 surface 3 #bottom
 
 #7) export the mesh
-#export mesh "/home/arash/thesis-matlab-fem/MatlabTestsPetsc/beam8_8e_l999_r998_6ss.exo" dimension 3 overwrite
-
-export mesh "/home/arash/thesis-matlab-fem/MatlabTestsPetsc/beam27_8e_l999_r998_6ss.exo" dimension 3 overwrite
+#export mesh "/home/arash/thesis-matlab-fem/MatlabTestsPetsc/test.exo" dimension 3 overwrite
 
 
-##############  
-#  beam-8-with curve nodeset  #
-##############
+
+##############################  
+#  beam 8-elements 27-noded  #
+##############################
 
 reset
 #1) Create a Cylinder: volume 1
@@ -65,24 +64,24 @@ mesh volume 1
 block 1 element type hex27
 
 #6) Specifiy nodesets for boundary
-nodeset 999 surface 4 #left
-nodeset 998 surface 6 #right 
+nodeset 999 surf 4 #left
+nodeset 998 surf 6 #right curve 10
+nodeset 997 surf 1 #front
+nodeset 996 surf 2 #back
+nodeset 995 surf 5 #top
+nodeset 994 surf 3 #bottom 
 
 
 #7) export the mesh
-#export mesh "/home/arash/thesis-matlab-fem/MatlabTestsPetsc/beam8_8e_l999_r998_6ss_old.exo" dimension 3 overwrite
+export mesh "/home/arash/thesis-matlab-fem/MatlabTestsPetsc/beam27_8e_l999_r998_6ss.exo" dimension 3 overwrite
 
-export mesh "/home/arash/thesis-matlab-fem/MatlabTestsPetsc/beam27_8e_l999_r998_6ss_old.exo" dimension 3 overwrite
-
-
-
-##############  
-#  beam-8 2-elements  #
-##############
+#############################  
+#  beam 8-elements 8-noded  #
+#############################
 
 reset
 #1) Create a Cylinder: volume 1
-brick x 1 y 1 z 1
+brick x 8 y 1 z 1
 
 #2) Make the entire holed-cylinder into a block.
 block 1 volume 1
@@ -99,16 +98,16 @@ mesh volume 1
 #5.1) Mesh refinement
 #refine volume 1 numsplit 1 bias 1.0 depth 1 smooth 
 
-#5.2) Hex27 Meshes if needed
-block 1 element type hex27
-
 #6) Specifiy nodesets for boundary
-nodeset 999 surface 4 #left
-nodeset 998 curve 10 #right 
+nodeset 999 surf 4 #left
+nodeset 998 surf 6 #right could change to curve 10 for a line
+nodeset 997 surf 1 #front
+nodeset 996 surf 2 #back
+nodeset 995 surf 5 #top
+nodeset 994 surf 3 #bottom 
 
 
 #7) export the mesh
+export mesh "/home/arash/thesis-matlab-fem/MatlabTestsPetsc/beam8_8e_l999_r998_6ss.exo" dimension 3 overwrite
 
-export mesh "/home/arash/thesis-matlab-fem/MatlabTestsPetsc/beam27_1e_l999_r998_6ss.exo" dimension 3 overwrite
-export mesh "/home/arash/thesis-matlab-fem/testRepo/MatlabTestsPetsc/beam27_1e_l999_r998_6ss_old.exo" dimension 3 overwrite
 
