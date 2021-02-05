@@ -80,11 +80,11 @@ function f = HyperFSF_dF_ref_dav(dlta_ue,ddu, stored ,dXdx, wdetj, phys)
      
      delta_b = (graddu * b + b * graddu'); % current config
      
-                                   %(F^(-T)  :   dcF)
-     FinvT_contract_deltaF = sum(sum(F_inv' .* graddu)); 
+                                   %(b^(-1)  :  delta_b)
+     inv_b_contract_delta_b = sum(sum(inv(b) .* delta_b)); 
      
-     dtau = (muu*delta_b + lambda*FinvT_contract_deltaF * I3)/J(i);
-     dstress = -graddu' * tau  + dtau;
+     dtau = (muu*delta_b + 0.5*lambda*inv_b_contract_delta_b * I3)/J(i);
+     dstress = (-tau * graddu')/J(i)  + dtau;
      fdP((i-1)*c+1:i*c,:) =  dX_ref_dx_cur'* dstress * wdetj(i);
    end
    
