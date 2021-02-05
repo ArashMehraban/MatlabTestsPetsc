@@ -126,7 +126,7 @@ function [u,JACOB__] =  get_fem_sol(msh, dof, P, userf, userdf, usrf_force, solv
        [~, stored] = compute_residual(u, msh, dofMap, P ,userf,usrf_force,phys, load_increments(m), appCtx);
        %populate global Jacobian based on the global residual for each step
        for i=1:size(u,1)                          
-           JACOB__.stepJacs{m}(i,:)=compute_Jacobian_action(dlta_u, msh, dofMap, P ,userdf, phys, stored);
+           JACOB__.stepJacs{m}(i,:)=compute_Jacobian_action(Iu(:,i), msh, dofMap, P ,userdf, phys, stored);
        end
        %Jacobian from fsolve for each step
        fun = @(u)compute_residual(u, msh, dofMap, P ,userf,usrf_force,phys, load_increments(m), appCtx);
