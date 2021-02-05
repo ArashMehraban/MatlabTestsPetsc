@@ -31,7 +31,7 @@ solver.KSP_max_iter = 225;
 solver.nonlinear_max_iter=10;
 solver.global_res_tol = 1.0e-6;
 solver.precond = 'OFF';
-solver.numSteps = 90;
+solver.numSteps = 10;
 
 
 %degree of accuracy to solve with

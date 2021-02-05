@@ -27,19 +27,22 @@ appCtx.theta = 30; % in degrees as apoose to radian
 %  global Jacobian computed from fslove and residual evaluation.
 %
 solver=struct();
-solver.KSP_type = 'test_jac'; 
+solver.KSP_type = 'gmres'; 
 solver.KSP_max_iter = 225;
 solver.nonlinear_max_iter=10;
 solver.global_res_tol = 1.0e-6;
 solver.precond = 'OFF';
-solver.numSteps = 1;
+solver.numSteps = 10;
 
 
 %degree of accuracy to solve with
-degree = 2;  % 1 for Hex8, 2 for Hex27 
+degree = 1;  % 1 for Hex8, 2 for Hex27 
 P = degree +1;
 
-[~ , msh] = get_mesh('beam8_8e_l999_r998_6ss.exo','lex');
+[origConn , msh] = get_mesh('beam8_8e_l999_r998_6ss.exo','lex');
+
+appCtx.origConn = origConn;
+appCtx.vtk_filename = 'HyperFS_ref';
 
 msh = apply_boundary_on(msh, {'ns998', 'ns999'}, {@bc_zero, @bc_bend});
 
