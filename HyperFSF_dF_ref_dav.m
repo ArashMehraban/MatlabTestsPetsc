@@ -57,37 +57,8 @@ function f = HyperFSF_dF_ref_dav(dlta_ue,ddu, stored ,dXdx, wdetj, phys)
    [r,c] = size(ddu);
    blk = r/c; 
 
-%    for i = 1:blk
-%      ddu_tmp= dXdx((i-1)*c+1:i*c,:) * ddu((i-1)*c+1:i*c,:);  %ref config
-%      
-%      %drF
-%      Graddu((i-1)*c+1:i*c,:) = ddu_tmp;  %ref config
-%      
-%      F = stored((i-1)*c+1:i*c,:); % F computed in HyperFS_ref_dav
-%      dX_ref_dx_cur = dXdx((i-1)*c+1:i*c,:) * (inv(F));    %inv_jac_wrt_cur
-%      F_inv=F\I3;
-%      J(i) = det(F);
-%      b = F*F';
-%      tau = (muu*b + (lambda*log(J(i))-muu)*I3);
-%      %dtau = dtau*dF:delta_b
-%      %     = mu*delta_b + (lambda*F^(-T):dcF)*I3  
-%      %where:
-%      % dcF  =   drF   * F_inv 
-%      graddu = ddu_tmp * F_inv;
-%      
-%      %dtau = as function of 
-%      
-%      delta_b = (graddu * b + b * graddu'); % current config
-%      
-%                                    %(b^(-1)  :  delta_b)
-%      inv_b_contract_delta_b = sum(sum(inv(b) .* delta_b)); 
-%      
-%      dtau = (muu*delta_b + 0.5*lambda*inv_b_contract_delta_b * I3);
-%      dstress = (-tau * graddu') + dtau;
-%      fdP((i-1)*c+1:i*c,:) =  dXdx((i-1)*c+1:i*c,:)'* dstress * wdetj(i);
-%    end
    
-    for i = 1:blk
+   for i = 1:blk
      ddu_tmp= dXdx((i-1)*c+1:i*c,:) * ddu((i-1)*c+1:i*c,:);  %ref config
      
      %drF
