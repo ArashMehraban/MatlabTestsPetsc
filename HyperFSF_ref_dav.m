@@ -56,18 +56,30 @@ function [usrfStored, f1] = HyperFSF_ref_dav(du, dXdx, wdetj, phys)
    
    I3=eye(3); 
    
-   for i = 1:blk
+%    for i = 1:blk
+%      du_tmp= dXdx((i-1)*c+1:i*c,:) * du((i-1)*c+1:i*c,:); %ref config
+%      Gradu((i-1)*c+1:i*c,:) = du_tmp; %ref config
+%      F = eye(3) + du_tmp;             % dx_current/dx_initial
+%      %dX_ref/dX_current = (dX_ref/dx_initial) (dx_initial/dx_current)
+%      dX_ref_dx_cur = dXdx((i-1)*c+1:i*c,:) * F\I3; %May want to store this
+% %      usrfStored((i-1)*c+1:i*c,:) = dX_ref_dx_cur;
+%      usrfStored((i-1)*c+1:i*c,:) = F;
+%      J(i) = det(F);
+%      b = F*F';
+%      tau = (muu*b + (lambda*log(J(i))-muu)*I3);
+%      f1((i-1)*c+1:i*c,:) = dXdx((i-1)*c+1:i*c,:)'* tau * wdetj(i);
+%    end
+       
+     for i = 1:blk
      du_tmp= dXdx((i-1)*c+1:i*c,:) * du((i-1)*c+1:i*c,:); %ref config
      Gradu((i-1)*c+1:i*c,:) = du_tmp; %ref config
      F = eye(3) + du_tmp;             % dx_current/dx_initial
-     %dX_ref/dX_current = (dX_ref/dx_initial) (dx_initial/dx_current)
-     dX_ref_dx_cur = dXdx((i-1)*c+1:i*c,:) * F\I3; %May want to store this
-%      usrfStored((i-1)*c+1:i*c,:) = dX_ref_dx_cur;
+     F_inv = F\I3;
      usrfStored((i-1)*c+1:i*c,:) = F;
      J(i) = det(F);
      b = F*F';
      tau = (muu*b + (lambda*log(J(i))-muu)*I3);
-     f1((i-1)*c+1:i*c,:) = dXdx((i-1)*c+1:i*c,:)'* tau * wdetj(i);
+     f1((i-1)*c+1:i*c,:) = dXdx((i-1)*c+1:i*c,:)'* tau * F_inv' * wdetj(i);
    end
-       
+   
 end
